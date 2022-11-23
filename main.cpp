@@ -1,9 +1,23 @@
 #include <iostream>
 #include <variant>
 #include <string>
+#include <type_traits>
 
-int main()
-{
+void TestLabmda() {
+    auto l = [](auto arg) {
+        std::cout << arg << ' ';
+
+        return std::type_identity<void>{};
+    };
+
+    auto log = [&l] (auto... args) {
+        (l(args) = ...);
+    };
+
+    log(1,"2",3.0);
+}
+
+void TestVariant() {
     std::variant<int, float> v,w;
 
     v = 42;
@@ -27,6 +41,13 @@ int main()
     {
         std::cerr << e.what() << '\n';
     }
-    
+}
+
+int main()
+{
+    TestVariant();
+
+    TestLabmda();
+
     return 0;
 }

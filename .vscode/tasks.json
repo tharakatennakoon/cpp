@@ -2,8 +2,8 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: clang++-10 build active file",
-            "command": "/usr/bin/clang++-10",
+            "label": "C/C++: clang++ build active file",
+            "command": "/usr/bin/clang++",
             "args": [
                 "-std=c++17",
                 "-fcolor-diagnostics",
@@ -11,10 +11,10 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${workspaceFolder}/build/a.out"
+                "${fileDirname}/build/${fileBasenameNoExtension}"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${fileDirname}"
             },
             "problemMatcher": [
                 "$gcc"

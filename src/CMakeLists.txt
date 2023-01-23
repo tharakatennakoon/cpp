@@ -1,4 +1,4 @@
-add_library(solution MedianOFTwoSortedArrays.cpp)
+add_library(solution MedianOFTwoSortedArrays.cpp TwoSum.cpp)
 target_include_directories(solution PUBLIC includes)
 
 add_executable(code_sample main.cpp)

@@ -10,10 +10,16 @@ add_library(GTest::GTest INTERFACE IMPORTED)
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 add_executable(test_median_of_two_sorted_arrays TestMedianOfTwoSortedArrays.cpp)
-
 target_link_libraries(test_median_of_two_sorted_arrays
 PRIVATE
     GTest::GTest
     solution)
 
 add_test(gtest_median_of_two_sorted_arrays test_median_of_two_sorted_arrays)
+
+add_executable(test_two_sum TestTwoSum.cpp)
+target_link_libraries(test_two_sum
+PRIVATE
+    GTest::GTest
+    solution)
+add_test(gtest_two_sum test_two_sum)

@@ -23,3 +23,10 @@ PRIVATE
     GTest::GTest
     solution)
 add_test(gtest_two_sum test_two_sum)
+
+add_executable(test_add_two_numbers TestAddTwoNumbers.cpp)
+target_link_libraries(test_add_two_numbers
+PRIVATE
+    GTest::GTest
+    solution)
+add_test(gtest_add_two_numbers test_add_two_numbers)

@@ -22,13 +22,10 @@ int Solution::lengthOfLongestSubstring(string s)
             int c_pos = substring_monitor_map[c];
             substring_monitor_map[c] = index;
 
-            if (start_pos < c_pos)
-                start_pos = c_pos;
+            start_pos = max(start_pos, c_pos);
         }
 
-        int diff = index - start_pos;
-        if (diff > substring_length)
-            substring_length = diff;
+        substring_length = max(index-start_pos, substring_length);
     }
 
     return substring_length;

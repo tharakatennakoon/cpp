@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -20,4 +21,7 @@ public:
 
     // https://leetcode.com/problems/add-two-numbers/
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2);
+
+    // https://leetcode.com/problems/longest-substring-without-repeating-characters/
+    int lengthOfLongestSubstring(string s);
 };

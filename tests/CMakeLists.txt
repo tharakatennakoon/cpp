@@ -30,3 +30,10 @@ PRIVATE
     GTest::GTest
     solution)
 add_test(gtest_add_two_numbers test_add_two_numbers)
+
+add_executable(test_length_of_longet_substring TestLengthOfLongestSubstring.cpp)
+target_link_libraries(test_length_of_longet_substring
+PRIVATE
+    GTest::GTest
+    solution)
+add_test(gtest_length_of_longet_substring test_length_of_longet_substring)

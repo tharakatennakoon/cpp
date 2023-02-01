@@ -37,3 +37,10 @@ PRIVATE
     GTest::GTest
     solution)
 add_test(gtest_length_of_longet_substring test_length_of_longet_substring)
+
+add_executable(test_is_palindrome TestIsPalindrome.cpp)
+target_link_libraries(test_is_palindrome
+PRIVATE
+    GTest::GTest
+    solution)
+add_test(gtest_is_palindrome test_is_palindrome)

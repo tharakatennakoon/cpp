@@ -24,4 +24,7 @@ public:
 
     // https://leetcode.com/problems/longest-substring-without-repeating-characters/
     int lengthOfLongestSubstring(string s);
+
+    // https://leetcode.com/problems/valid-palindrome/description/
+    bool isPalindrome(string s);
 };

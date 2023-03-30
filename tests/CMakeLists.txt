@@ -44,3 +44,10 @@ PRIVATE
     GTest::GTest
     solution)
 add_test(gtest_is_palindrome test_is_palindrome)
+
+add_executable(test_three_sum TestThreeSum.cpp)
+target_link_libraries(test_three_sum
+PRIVATE
+    GTest::GTest
+    solution)
+add_test(gtest_three_sum test_three_sum)

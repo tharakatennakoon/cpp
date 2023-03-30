@@ -5,6 +5,7 @@ add_library(solution
     TwoSum.cpp 
     AddTwoNumbers.cpp
     LengthOfLongestSubstring.cpp
-    IsPalindrome.cpp)
+    IsPalindrome.cpp
+    ThreeSum.cpp)
 
 target_include_directories(solution PUBLIC includes)

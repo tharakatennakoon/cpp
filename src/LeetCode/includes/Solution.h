@@ -27,4 +27,7 @@ public:
 
     // https://leetcode.com/problems/valid-palindrome/description/
     bool isPalindrome(string s);
+
+    // https://leetcode.com/problems/3sum/
+    vector<vector<int>> threeSum(vector<int>& nums);
 };

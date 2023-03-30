@@ -1,3 +1,2 @@
 add_subdirectory(LeetCode)
 add_subdirectory(CodeSamples)
-add_subdirectory(TransferQueue)

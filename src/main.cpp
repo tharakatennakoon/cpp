@@ -3,32 +3,45 @@
 #include <string>
 #include <type_traits>
 
-class base 
-{
-public:
-    base(){ std::cout << "base()" << std::endl; };
-    ~base(){ std::cout << "~base()" << std::endl; };
-    int foo(){ std::cout << "base::foo()" << std::endl; };
-};
+// void TestLabmda() {
+//     auto l = [](auto arg) {
+//         std::cout << arg << ' ';
 
-class derived : base
-{
-public:
-    derived(){ std::cout << "derived()" << std::endl; }
-    ~derived(){ std::cout << "~derived()" << std::endl; }
-    int foo(){ std::cout << "derived::foo()" << std::endl; }
-};
+//         return std::type_identity<void>{};
+//     };
 
-class baseVirtual
-{
-public:
-    //http://www.stroustrup.com/bs_faq2.html#virtual-ctor
-    //virtual baseVirtual(){}; // Compile error, cannot add virtual to constructor
-    baseVirtual(){ std::cout << "baseVirtual()" << std::endl; };
-    virtual ~baseVirtual(){ std::cout << "~baseVirtual()" << std::endl; };
-}
+//     auto log = [&l] (auto... args) {
+//         (l(args) = ...);
+//     };
 
+//     log(1,"2",3.0);
+// }
 
+// void TestVariant() {
+//     std::variant<int, float> v,w;
+
+//     v = 42;
+
+//     try
+//     {
+//         int i = std::get<int>(v);
+//         std::cout << "I : " << i << std::endl;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << e.what() << '\n';
+//     }
+    
+//     try
+//     {
+//         float f = std::get<float>(v);
+//         std::cout << "F : " << f << std::endl;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << e.what() << '\n';
+//     }
+// }
 
 int main()
 {
@@ -40,3 +53,4 @@ int main()
 
     return 0;
 }
+

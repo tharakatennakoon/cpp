@@ -3,53 +3,130 @@
 #include <string>
 #include <type_traits>
 
-// void TestLabmda() {
-//     auto l = [](auto arg) {
-//         std::cout << arg << ' ';
+class base 
+{
+public:
+    base(){ std::cout << "base()" << static_cast<void*>(this) << std::endl; };
+    ~base(){ std::cout << "~base()" << static_cast<void*>(this) << std::endl; };
+    int foo(){ std::cout << "base::foo() this :" << static_cast<void*>(this) << std::endl; return 0; };
+    base(const base&){std::cout << "base(base&)" << static_cast<void*>(this) << std::endl;}
+    base& operator=(const base&){std::cout << "base& base=" << static_cast<void*>(this) << std::endl; return *this; }
+};
 
-//         return std::type_identity<void>{};
-//     };
+class derived_0 : public base
+{
+public:
+    derived_0(){ std::cout << "derived_0()" << static_cast<void*>(this) << std::endl; }
+    ~derived_0(){ std::cout << "~derived_0()" << static_cast<void*>(this) << std::endl; }
+    int foo(){ std::cout << "derived_0::foo()" << static_cast<void*>(this) << std::endl; return 0; }
+    derived_0(const derived_0&){std::cout << "derived_0(derived_0&)" << static_cast<void*>(this) << std::endl;}
+    derived_0& operator=(const derived_0&){std::cout << "derived_0& operator=" << static_cast<void*>(this) << std::endl; return *this; }
+};
 
-//     auto log = [&l] (auto... args) {
-//         (l(args) = ...);
-//     };
+class derived_1 : public derived_0
+{
+private:
+    char* test = new char[100];
 
-//     log(1,"2",3.0);
-// }
+public:
+    derived_1(){ std::cout << "derived_1()" << static_cast<void*>(this) << std::endl; }
+    ~derived_1(){ delete[](test); std::cout << "~derived_1()" << static_cast<void*>(this) << std::endl; }
+    int foo() { std::cout << "derived_1::foo()" << static_cast<void*>(this) << std::endl; return 0; }
 
-// void TestVariant() {
-//     std::variant<int, float> v,w;
+    derived_1(const derived_1&){std::cout << "derived_1(derived_1&)" << static_cast<void*>(this) << std::endl;}
+    derived_1& operator=(const derived_1&){std::cout << "derived_1& operator=" << static_cast<void*>(this) << std::endl; return *this; }    
+};
 
-//     v = 42;
+class baseVirtual
+{
+public:
+    //http://www.stroustrup.com/bs_faq2.html#virtual-ctor
+    //virtual baseVirtual(){}; // Compile error, cannot add virtual to constructor
+    baseVirtual(){ std::cout << "baseVirtual()" << std::endl; };
+    virtual ~baseVirtual(){ std::cout << "~baseVirtual()" << std::endl; };
+    virtual int foo() { std::cout << "baseVirtual::foo()" << std::endl; return 0; }
+};
 
-//     try
-//     {
-//         int i = std::get<int>(v);
-//         std::cout << "I : " << i << std::endl;
-//     }
-//     catch(const std::exception& e)
-//     {
-//         std::cerr << e.what() << '\n';
-//     }
-    
-//     try
-//     {
-//         float f = std::get<float>(v);
-//         std::cout << "F : " << f << std::endl;
-//     }
-//     catch(const std::exception& e)
-//     {
-//         std::cerr << e.what() << '\n';
-//     }
-// }
+class derivedVirtual_0 : public baseVirtual
+{
+public:
+    derivedVirtual_0(){ std::cout << "derivedVirtual_0()" << std::endl; }
+    ~derivedVirtual_0(){ std::cout << "~derivedVirtual_0()" << std::endl; }
+    int foo(){ std::cout << "derivedVirtual_0::foo()" << std::endl; return 0; }
+};
+
+class derivedVirtual_1 : public derivedVirtual_0
+{
+public:
+    derivedVirtual_1(){ std::cout << "derivedVirtual_1()" << std::endl; }
+    ~derivedVirtual_1(){ std::cout << "~derivedVirtual_1()" << std::endl; }
+    int foo() { std::cout << "derivedVirtual_1::foo()" << std::endl; return 0; }
+};
+
+void testNonVertualClassPointers()
+{
+    std::cout << " ======= Casting Non Vertual Class Pointers ======= " << std::endl;
+    derived_1* d_1 = new derived_1();
+    derived_0* d_0 = static_cast<derived_0*>(d_1);
+    base* b = static_cast<base*>(d_1);
+
+    std::cout << "-----" << std::endl;
+
+    d_1->foo();
+    d_0->foo();
+    b->foo();
+
+    std::cout << "-----" << std::endl;
+
+    delete(d_1);
+    //delete(d_0); // -> this will call ~derived_0 and ~base - Cause memory leaks
+    //delete(b); // -> this will only call ~base ~ Cause memory leaks
+
+    std::cout << "=================================================== " << std::endl << std::endl;
+}
+
+void testNonVirtualClassObjects()
+{
+    std::cout << "======= Casting Vertual Class Objects ======= " << std::endl;
+
+    derived_1 d_1;
+    d_1.foo();
+
+    std::cout << "-----" << std::endl;
+
+    derived_0 d_0 = static_cast<derived_1>(d_1);
+    d_0.foo();
+
+    std::cout << "============================================ " << std::endl;
+}
+
+void testVirtualClassPointers()
+{
+    std::cout << "======= Casting Vertual Class Pointers ======= " << std::endl;
+    derivedVirtual_1* dv_1 = new derivedVirtual_1();
+    derivedVirtual_0* dv_0 = static_cast<derivedVirtual_0*>(dv_1);
+    baseVirtual* bv0 = static_cast<baseVirtual*>(dv_1);
+    baseVirtual* bv1 = static_cast<baseVirtual*>(dv_0);
+
+    std::cout << "-----" << std::endl;
+
+    dv_1->foo();
+    dv_0->foo();
+    bv0->foo();
+    bv1->foo();
+
+    std::cout << "-----" << std::endl;
+
+    delete(bv1); // Since this is virtual all destructors will get called
+
+    std::cout << " =================================== " << std::endl << std::endl;
+}
 
 int main()
 {
-    //TestVariant();
-
-    //TestLabmda();
-
-    std::cout << "main" << std::endl;
-
+    testNonVertualClassPointers();
+    testVirtualClassPointers();
+    testNonVirtualClassObjects();
+    
     return 0;
 }

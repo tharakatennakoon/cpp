@@ -4,8 +4,8 @@ public:
     TransferQueue() = default;
     ~TransferQueue() = default;
 
-    TransferQueue(TransferQueue &) = delete;
-    TransferQueue(TransferQueue &&) = delete;
-    TransferQueue &operator=(const TransferQueue &) = delete;
-    TransferQueue &operator=(const TransferQueue &&) = delete;
+    TransferQueue(const TransferQueue &) = default;
+    TransferQueue(TransferQueue &&) = default;
+    TransferQueue &operator=(const TransferQueue &) = default;
+    TransferQueue &operator=(TransferQueue &&) = default;
 };

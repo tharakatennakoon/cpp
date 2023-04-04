@@ -1,2 +1,1 @@
 add_subdirectory(Virtual)
-add_subdirectory(TransferQueue)

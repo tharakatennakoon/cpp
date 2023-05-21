@@ -1,9 +1,10 @@
 #include <iostream>
 #include "TransferQueue.h"
+#include "fmt/core.h"
 
 int main()
 {
-    std::cout << "Tranfer Queue" << std::endl;
+    fmt::println("Tranfer Queue");
 
     TransferQueue tfQ1;
     TransferQueue tfQ2;

@@ -9,3 +9,5 @@ add_library(solution
     ThreeSum.cpp)
 
 target_include_directories(solution PUBLIC includes)
+
+add_subdirectory(tests)

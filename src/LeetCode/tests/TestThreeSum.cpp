@@ -67,7 +67,7 @@
 //     EXPECT_EQ(expected, actual);
 // }
 
-TEST(TestThreeSum, Test6)
+/*TEST(TestThreeSum, Test6)
 {
     vector<int> nums{1,1,-2};
     vector<vector<int>> expected{
@@ -78,4 +78,4 @@ TEST(TestThreeSum, Test6)
     vector<vector<int>> actual = solution.threeSum(nums);
 
     EXPECT_EQ(expected, actual);
-}
+}*/

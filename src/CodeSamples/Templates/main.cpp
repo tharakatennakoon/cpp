@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include "NoneTypeParameters.h"
+#include "TemplateTemplateParameters.h"
 
 // Variable Templates
 template<class T>
@@ -27,9 +28,16 @@ int main()
     sa.setElemAtIndex(3, 10);
     
     std::cout << sa.getElementAtIndex(3) << std::endl;
-    std::cout << "sa Size" << sa.getSize() << std::endl;
     std::cout << "sb Size" << sb.getSize() << std::endl;
+    std::cout << "sa Size" << sa.getSize() << std::endl;
     std::cout << "sc Size" << sc.getSize() << std::endl;
+
+    std::cout << "\n\n====================== Template Templates ======================" << std::endl;
+    Adaptor<int, std::vector> a1;
+    Adaptor<long, std::list> a2;
+
+    a1.push_back(10);
+    a2.push_back(2.0);
 
     return 0;
 }

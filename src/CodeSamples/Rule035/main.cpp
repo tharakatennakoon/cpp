@@ -7,6 +7,7 @@ class Rule0
         char    charArray[10];
         char     c;
         std::shared_ptr<char[]> sp;
+
         // std::unique_ptr<char[]> up; //this is not allowed as copy constructor implicitly deleted
         // char*   charBuffer; // Bad idea, only pointer value is getting copied
 

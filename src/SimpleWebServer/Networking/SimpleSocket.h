@@ -3,6 +3,9 @@
 #include <sys/socket.h>
 #include <fmt/core.h>
 
+namespace SWS
+{
+
 class SimpleSocket
 {
 public:
@@ -20,3 +23,5 @@ private:
     int service     = SOCK_STREAM;
     int protocol    = 0;
 };
+
+}

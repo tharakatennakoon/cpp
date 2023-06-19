@@ -29,5 +29,6 @@ public:
     bool isPalindrome(string s);
 
     // https://leetcode.com/problems/3sum/
-    vector<vector<int>> threeSum(vector<int>& nums);
+    vector<vector<int>> threeSum1(vector<int>& nums);
+    vector<vector<int>> threeSum2(vector<int>& nums);
 };

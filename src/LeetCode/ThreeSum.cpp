@@ -1,7 +1,8 @@
 #include "Solution.h"
 #include <algorithm>
+#include <iostream>
 
-vector<vector<int>> Solution::threeSum(vector<int>& nums)
+vector<vector<int>> Solution::threeSum1(vector<int>& nums)
 {
     vector<vector<int>> result;
 
@@ -10,115 +11,178 @@ vector<vector<int>> Solution::threeSum(vector<int>& nums)
     // if all negative || positive || count less than 3
     if (nums[0] > 0 || nums[nums.size() - 1] < 0 || nums.size() < 3)
         return result;
-
-    // int negative_start_pos = 0;
-    // int positive_start_pos = 0;
-    // int zero_start_pos = -1;
-
-    // for (int i = 0; i < nums.size(); i++)
-    // {
-    //     if (nums[i] == 0)
-    //     {
-    //         zero_start_pos = i;
-    //         break;
-    //     }
-    // }
-
-    // for (int i = max(zero_start_pos,0); i < nums.size(); i++)
-    // {
-    //     if (nums[i] > 0)
-    //     {
-    //         positive_start_pos = i;
-    //         break;
-    //     }
-    // }
-
-    // for (int i = 0; i < positive_start_pos;)
-    // {
-    //     int num1 = nums[i];
-
-    //     for (int j = i + 1; j < positive_start_pos;)
-    //     {
-    //         int num2 = nums[j];
-    //         int sum = num1 + num2;
-
-    //         int startpos = zero_start_pos < 0 ? positive_start_pos : zero_start_pos;
-    //         for (int k = max(j, startpos); k < nums.size(); k++)
-    //         {
-    //             int num3 = nums[k];
-    //             if (sum + num3 == 0)
-    //             {
-    //                 result.push_back(std::vector{num1, num2, num3});
-    //                 break;
-    //             }
-    //         }
-
-    //         for (int k = j + 1; j < positive_start_pos; k++)
-    //         {
-    //             if (num2 != nums[k])
-    //             {
-    //                 j = k;
-    //                 break;
-    //             }
-    //         }
-    //     }
-
-    //     for (int j = i + 1; i < positive_start_pos; j++)
-    //     {
-    //         if (num1 != nums[j])
-    //         {
-    //             i = j;
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // if (zero_start_pos != -1 && positive_start_pos == 0)
-    // {
-    //     if (nums.size() - zero_start_pos > 2)
-    //     {
-    //         result.push_back(std::vector{0, 0, 0});
-    //     }
-    // }
-
-    int zero_start_pos = 0;
-    while(nums[zero_start_pos++] < 0);
-
-    int positive_start_pos = zero_start_pos;
-    while(nums[positive_start_pos++] > 0);
-
-    int first_num_pos = 0;
-    int third_num_pos = nums.size() - 1;
-    bool end_search = false;
-
-    while (first_num_pos < positive_start_pos || !end_search)
+    
+    // goto >= 0 index
+    int positiveIndex = 0;
+    while (nums[positiveIndex] < 0)
     {
-        int num1 = nums[first_num_pos];
+        positiveIndex++;
+    }
 
-        int second_num_pos = first_num_pos + 1;
-        while (second_num_pos < nums.size() - 1 || !end_search)
+    int i = 0;
+    bool movedToPositive = false;
+    while (!movedToPositive)
+    {
+        int num1 = nums[i];
+
+        int j = i + 1;
+        while (j < nums.size() - 1)
         {
-            int num2 = nums[second_num_pos];
-            int sum = num1 + num2;
+            int num2 = nums[j];
 
-            while (third_num_pos > second_num_pos)
+            if(num1 + num2 > 0)
             {
-                int num3 = nums[third_num_pos--];
-                sum += num3;
+                break;
+            }
 
-                if (sum < 0)
+            int k = std::max(j + 1, positiveIndex);
+            int pos = nums.size() - 1;
+            while (pos >= k)
+            {
+                int num3 = nums[pos];
+
+                if (num3 + num2 + num1 == 0)
                 {
-                    end_search = true;
+                    result.push_back(std::vector{num1, num2, num3});
                     break;
                 }
-                else if (sum)
-                {
+                pos--;
+            }
 
+            j++;
+            for (;j < nums.size(); j++)
+            {
+                if (num2 != nums[j])
+                {
+                    break;
                 }
             }
         }
+
+        i++;
+        for (;i < nums.size()-1; i++)
+        {
+            if (num1 != nums[i])
+            {
+                break;
+            }
+        }
+
+        if (i >= nums.size() - 2 || nums[i] > 0)
+        {
+            movedToPositive = true;
+        }
     }
 
+    std::cout << " result size " << result.size() << std::endl;
 
+    return result;
+}
+
+vector<vector<int>> Solution::threeSum2(vector<int>& nums)
+{
+    vector<vector<int>> result;
+
+    std::sort(nums.begin(), nums.end());
+
+    // if all negative || positive || count less than 3
+    if (nums[0] > 0 || nums[nums.size() - 1] < 0 || nums.size() < 3)
+        return result;
+    
+    // goto >= 0 index
+    int positiveIndex = 0;
+    while (nums[positiveIndex] < 0)
+    {
+        positiveIndex++;
+    }
+
+    int n1Pos = 0;
+    int n3Pos = nums.size() - 1;
+    int adjustN1Pos = true;
+    while (n1Pos < positiveIndex && n3Pos > positiveIndex)
+    {
+        int n1 = nums[n1Pos];
+        int n3 = nums[n3Pos];
+        int tot = n1 + n3;
+
+        int n2Pos = positiveIndex;
+        if (tot > 0)
+        {
+            n2Pos--;
+
+            while (n2Pos > n1Pos)
+            {
+                if (nums[n2Pos] + tot == 0)
+                {
+                    result.push_back(std::vector{n1, nums[n2Pos], n3});
+                    break;
+                }
+                else if (nums[n2Pos] + tot < 0)
+                {
+                    adjustN1Pos = true;
+                    break;
+                }
+
+                n2Pos--;
+            }
+        }
+        else
+        {
+            while (n2Pos < n3Pos)
+            {
+                if (nums[n2Pos] + tot == 0)
+                {
+                    result.push_back(std::vector{n1, nums[n2Pos], n3});
+                    break;
+                }
+                else if (nums[n2Pos] + tot > 0)
+                {
+                    adjustN1Pos = false;
+                    break;
+                }
+
+                n2Pos++;
+            }
+        }
+
+        while (n1 == nums[n1Pos + 1]) {n1Pos++;}
+        while (n3 == nums[n3Pos - 1]) {n3Pos--;}
+
+        if (n1Pos < positiveIndex - 1 && adjustN1Pos)
+        {
+            n1Pos++;
+        }
+        else if (n3Pos > positiveIndex + 1 && !adjustN1Pos)
+        {
+            n3Pos--;
+        }
+        else
+        {
+            break;
+        }
+
+        if (n1Pos > positiveIndex)
+        {
+            adjustN1Pos = false;
+        }
+        else if (n3Pos < positiveIndex)
+        {
+            adjustN1Pos = true;
+        }
+        else
+        {
+            adjustN1Pos = !adjustN1Pos;
+        }
+    }
+
+    int zeroCount = 0;
+
+    while(nums[positiveIndex] == 0) {zeroCount++; positiveIndex++;}
+
+    if (zeroCount >= 3)
+    {
+        result.push_back(std::vector{0, 0, 0});
+    }
+    
     return result;
 }

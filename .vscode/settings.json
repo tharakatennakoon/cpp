@@ -79,6 +79,10 @@
         "ios": "cpp",
         "locale": "cpp",
         "mutex": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "codecvt": "cpp",
+        "condition_variable": "cpp",
+        "thread": "cpp",
+        "typeindex": "cpp"
     }
 }

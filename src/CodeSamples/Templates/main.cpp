@@ -3,6 +3,7 @@
 
 #include "NoneTypeParameters.h"
 #include "TemplateTemplateParameters.h"
+#include "Fibonanchi.h"
 
 // Variable Templates
 template<class T>
@@ -38,6 +39,13 @@ int main()
 
     a1.push_back(10);
     a2.push_back(2.0);
+
+    std::cout << "\n\n====================== Fibonanchi ======================" << std::endl;
+    int a = fibonanchi<10>();
+    std::cout << "Fibonanchi Func 10 : " << a << std::endl;
+
+    int b = fib<10>;
+    std::cout << "Fibonanchi Variable 10 : " << b << std::endl;
 
     return 0;
 }

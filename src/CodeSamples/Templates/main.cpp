@@ -27,7 +27,7 @@ int main()
     SizedArray<float, 12> sc;
 
     sa.setElemAtIndex(3, 10);
-    
+
     std::cout << sa.getElementAtIndex(3) << std::endl;
     std::cout << "sb Size" << sb.getSize() << std::endl;
     std::cout << "sa Size" << sa.getSize() << std::endl;
@@ -41,10 +41,18 @@ int main()
     a2.push_back(2.0);
 
     std::cout << "\n\n====================== Fibonanchi ======================" << std::endl;
-    int a = fibonanchi<10>();
-    std::cout << "Fibonanchi Func 10 : " << a << std::endl;
+    constexpr int i = fibonanchi<int, 10>();
+    std::cout << "Fibonanchi Func 10 : " << i << std::endl;
 
-    int b = fib<10>;
+    // maximum limit is 20 since constexpr used
+    constexpr long cl = fibonanchi<long, 26>();
+    std::cout << "Fibonanchi Func 26 : " << cl << std::endl;
+
+    // for larger values gives stack errors
+    long l = fibonanchi<long, 50>();
+    std::cout << "Fibonanchi Func 50 : " << l << std::endl;
+
+    constexpr int b = fib<int, 10>;
     std::cout << "Fibonanchi Variable 10 : " << b << std::endl;
 
     return 0;

@@ -1,15 +1,17 @@
 #include <iostream>
 #include <iomanip>
+#include <fmt/core.h>
 
 #include "NoneTypeParameters.h"
 #include "TemplateTemplateParameters.h"
 #include "Fibonanchi.h"
+#include "Fold.h"
 
 // Variable Templates
-template<class T>
+template <class T>
 inline constexpr T pi = T(3.1415926535897932385L);
 
-template<class T>
+template <class T>
 T circle_area(T r) { return pi<T> * r * r; }
 
 int main()
@@ -44,16 +46,21 @@ int main()
     constexpr int i = fibonanchi<int, 10>();
     std::cout << "Fibonanchi Func 10 : " << i << std::endl;
 
-    // maximum limit is 20 since constexpr used
+    // maximum limit is 26 since constexpr used
     constexpr long cl = fibonanchi<long, 26>();
     std::cout << "Fibonanchi Func 26 : " << cl << std::endl;
 
     // for larger values gives stack errors
-    long l = fibonanchi<long, 50>();
-    std::cout << "Fibonanchi Func 50 : " << l << std::endl;
+    // long l = fibonanchi<long, 50>();
+    // std::cout << "Fibonanchi Func 50 : " << l << std::endl;
 
     constexpr int b = fib<int, 10>;
     std::cout << "Fibonanchi Variable 10 : " << b << std::endl;
+
+    fmt::println("\n\n====================== Fold ======================");
+    printer(1, 2, 3, "abc");
+    adds(1, 2, 3.0, 4, 6.0);
+    adds_reverse(1, 2, 3.0, 4, 6.0);
 
     return 0;
 }

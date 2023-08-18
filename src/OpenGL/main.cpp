@@ -50,14 +50,14 @@ GLuint copyVertexDataToGPU()
         +0.0f, +0.0f, 0.0f,        // Location XYZ
         +1.0f, +0.0f, 0.0f, +1.0f, // Color RGBA
         +1.0f, +1.0f, 0.0f,
-        +1.0f, +0.0f, 0.0f, +1.0f,
+        +0.0f, +1.0f, 0.0f, +1.0f,
         -1.0f, +1.0f, 0.0f,
-        +1.0f, +0.0f, 0.0f, +1.0f,
+        +0.0f, +0.0f, 1.0f, +1.0f,
 
         -1.0f, -1.0f, 0.0f,
-        +1.0f, +0.0f, 0.0f, +1.0f,
+        +1.0f, +1.0f, 0.0f, +1.0f,
         +1.0f, -1.0f, 0.0f,
-        +1.0f, +0.0f, 0.0f, +1.0f};
+        +1.0f, +0.0f, 1.0f, +1.0f};
 
     GLuint vertexBufferObject;
     glGenBuffers(1, &vertexBufferObject);

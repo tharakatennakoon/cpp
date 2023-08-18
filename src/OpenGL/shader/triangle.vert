@@ -1,8 +1,12 @@
-#version 330 core
+#version 430 core
 
-layout (location = 0) in vec3 aPos;
+in layout(location = 0) vec3 pos;
+in layout(location = 1) vec4 incolor;
+
+out vec4 fragcolor;
 
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = vec4(pos, 1.0);
+    fragcolor = incolor;
 }

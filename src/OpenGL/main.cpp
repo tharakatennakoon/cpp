@@ -12,7 +12,7 @@ std::string get_file_string(std::string filePath)
 
 void windowSizeCallback(GLFWwindow *window, int width, int height)
 {
-    glad_glViewport(0, 0, width, height);
+    glViewport(0, 0, width, height);
 }
 
 GLuint createShaderProgram()
@@ -25,21 +25,21 @@ GLuint createShaderProgram()
     const GLchar *fragCStr = strFrag.c_str();
     std::cout << strFrag.c_str() << std::endl;
 
-    GLuint vertexShader = glad_glCreateShader(GL_VERTEX_SHADER);
-    glad_glShaderSource(vertexShader, 1, &vertCStr, NULL);
-    glad_glCompileShader(vertexShader);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertCStr, NULL);
+    glCompileShader(vertexShader);
 
-    GLuint fragmentShader = glad_glCreateShader(GL_FRAGMENT_SHADER);
-    glad_glShaderSource(fragmentShader, 1, &fragCStr, NULL);
-    glad_glCompileShader(fragmentShader);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragCStr, NULL);
+    glCompileShader(fragmentShader);
 
-    GLuint shaderProgram = glad_glCreateProgram();
-    glad_glAttachShader(shaderProgram, vertexShader);
-    glad_glAttachShader(shaderProgram, fragmentShader);
-    glad_glLinkProgram(shaderProgram);
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
 
-    glad_glDeleteShader(vertexShader);
-    glad_glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     return shaderProgram;
 }
@@ -65,15 +65,15 @@ GLuint copyVertexDataToGPU()
         +0.0f, +1.0f, 1.0f, +1.0f};
 
     GLuint vertexBufferObject;
-    glad_glGenBuffers(1, &vertexBufferObject);
-    glad_glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-    glad_glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+    glGenBuffers(1, &vertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
-    glad_glEnableVertexAttribArray(0);
-    glad_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)0);
 
-    glad_glEnableVertexAttribArray(1);
-    glad_glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)(sizeof(GLfloat) * 3));
 
     return vertexBufferObject;
 }
@@ -82,9 +82,9 @@ GLuint copyElementDataToGPU()
 {
     GLushort indices[] = {0, 1, 2, 3, 4, 5};
     GLuint indexBufferObject;
-    glad_glGenBuffers(1, &indexBufferObject);
-    glad_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
-    glad_glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glGenBuffers(1, &indexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     return indexBufferObject;
 }
@@ -112,24 +112,23 @@ int main()
     glfwSetWindowSizeCallback(window, windowSizeCallback);
 
     gladLoadGL();
-    glad_glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST); // *
 
     GLuint vertexBufferObject = copyVertexDataToGPU();
     GLuint indexBufferObject = copyElementDataToGPU();
     GLuint shaderProgram = createShaderProgram();
     glUseProgram(shaderProgram);
 
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glad_glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-
-        glad_glClear(GL_COLOR_BUFFER_BIT);
-        glad_glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // glDrawArrays(GL_TRIANGLES, 0, 6); // Use element array for
-        glad_glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -138,9 +137,9 @@ int main()
         glfwPollEvents();
     }
 
-    glad_glDeleteBuffers(1, &vertexBufferObject);
-    glad_glDeleteBuffers(1, &indexBufferObject);
-    glad_glDeleteProgram(shaderProgram);
+    glDeleteBuffers(1, &vertexBufferObject);
+    glDeleteBuffers(1, &indexBufferObject);
+    glDeleteProgram(shaderProgram);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

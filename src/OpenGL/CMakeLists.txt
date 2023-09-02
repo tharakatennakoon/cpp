@@ -5,6 +5,7 @@ include(CTest)
 enable_testing()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glm)
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)

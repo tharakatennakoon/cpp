@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 
 in layout(location = 0) vec3 pos;
 in layout(location = 1) vec4 incolor;

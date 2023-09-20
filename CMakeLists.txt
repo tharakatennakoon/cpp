@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0)
+
+if (APPLE)
+  set (CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+endif()
+
 project(LeetCode VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)

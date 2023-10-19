@@ -83,6 +83,10 @@
         "codecvt": "cpp",
         "condition_variable": "cpp",
         "thread": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "csignal": "cpp",
+        "strstream": "cpp",
+        "cfenv": "cpp",
+        "valarray": "cpp"
     }
 }

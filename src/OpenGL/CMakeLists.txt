@@ -10,7 +10,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glm)
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp ./glad/src/glad.c)
+add_executable(${PROJECT_NAME} main.cpp BasicTriangle.cpp ./glad/src/glad.c)
 
 target_link_libraries(${PROJECT_NAME} glfw GLU GL ${CMAKE_DL_LIBS})
 

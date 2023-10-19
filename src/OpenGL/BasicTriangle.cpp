@@ -4,19 +4,19 @@
 #include <fstream>
 #include "include.h"
 
-std::string get_file_string(std::string filePath)
+static std::string get_file_string(std::string filePath)
 {
     std::ifstream ifs(filePath);
     return std::string((std::istreambuf_iterator<char>(ifs)),
                        (std::istreambuf_iterator<char>()));
 }
 
-void windowSizeCallback(GLFWwindow *window, int width, int height)
+static void windowSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-GLuint createShaderProgram()
+GLuint createTriangleShaderProgram()
 {
     std::string strVert = get_file_string("./shader/triangle.vert");
     const GLchar *vertCStr = strVert.c_str();
@@ -45,7 +45,7 @@ GLuint createShaderProgram()
     return shaderProgram;
 }
 
-GLuint copyVertexDataToGPU()
+GLuint copyTriangleVertexDataToGPU()
 {
     constexpr float first_trianlge_depth = 0.5;
     constexpr float second_trianlge_depth = -0.5;
@@ -79,7 +79,7 @@ GLuint copyVertexDataToGPU()
     return vertexBufferObject;
 }
 
-GLuint copyElementDataToGPU()
+GLuint copyTriangleElementDataToGPU()
 {
     GLushort indices[] = {0, 1, 2, 3, 4, 5};
     GLuint indexBufferObject;
@@ -90,9 +90,9 @@ GLuint copyElementDataToGPU()
     return indexBufferObject;
 }
 
-int main1()
+int DrawBasicTriandle()
 {
-    std::cout << "Hello Opengl" << std::endl;
+    std::cout << "Hello Triangle" << std::endl;
 
     GLFWwindow *window;
 
@@ -115,9 +115,9 @@ int main1()
     gladLoadGL();
     glEnable(GL_DEPTH_TEST); // *
 
-    GLuint vertexBufferObject = copyVertexDataToGPU();
-    GLuint indexBufferObject = copyElementDataToGPU();
-    GLuint shaderProgram = createShaderProgram();
+    GLuint vertexBufferObject = copyTriangleVertexDataToGPU();
+    GLuint indexBufferObject = copyTriangleElementDataToGPU();
+    GLuint shaderProgram = createTriangleShaderProgram();
     glUseProgram(shaderProgram);
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -143,12 +143,5 @@ int main1()
     glDeleteProgram(shaderProgram);
     glfwDestroyWindow(window);
     glfwTerminate();
-    return 0;
-}
-
-int main()
-{
-    DrawBasicTriandle();
-
     return 0;
 }

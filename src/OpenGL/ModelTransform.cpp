@@ -116,13 +116,6 @@ int DrawModelTransform()
     glm::mat4 modelTrans = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.0f));
     glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
 
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 1.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspectiveFov(glm::radians(45.0f), 4.0f, 3.0f, 0.1f, 100.0f);
-    // glm::mat4 mvp = projection * view * model;
-
     GLuint mvpID = glGetUniformLocation(shaderProgram, "mvp");
 
     GLfloat rot = 0;
@@ -133,14 +126,14 @@ int DrawModelTransform()
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // glDrawArrays(GL_TRIANGLES, 0, 6); // Use element array for
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
         rot = (((GLint)rot + 1) % 360);
         glm::mat4 modelRotate = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
         glm::mat4 model = modelRotate * modelTrans * modelRotate * modelScale;
 
         glUniformMatrix4fv(mvpID, 1, GL_FALSE, glm::value_ptr(model));
+
+        // glDrawArrays(GL_TRIANGLES, 0, 6); // Use element array for
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

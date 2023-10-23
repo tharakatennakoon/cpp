@@ -6,17 +6,23 @@
 #include <gtc/matrix_transform.hpp>
 
 #include <vector>
+#include <tuple>
 
 #include "include.h"
 
-struct mvp
+struct rs
 {
-    glm::mat4 T;
     glm::mat4 R;
     glm::mat4 S;
 };
 
-using MVP = mvp;
+struct t
+{
+    glm::mat4 t;
+};
+
+using RS = rs;
+using T = t;
 
 static std::string get_file_string(std::string filePath)
 {
@@ -49,11 +55,11 @@ static void checkShaderErrors(std::string type, GLuint shader)
 
 static GLuint createSquareShaderProgram()
 {
-    std::string strVert = get_file_string("./shader/uniform.vert");
+    std::string strVert = get_file_string("./shader/uniformMultiBind.vert");
     const GLchar *vertCStr = strVert.c_str();
     std::cout << strVert.c_str() << std::endl;
 
-    std::string strFrag = get_file_string("./shader/uniform.frag");
+    std::string strFrag = get_file_string("./shader/uniformMultiBind.frag");
     const GLchar *fragCStr = strFrag.c_str();
     std::cout << strFrag.c_str() << std::endl;
 
@@ -118,9 +124,10 @@ static void DebugFunction(GLenum source, GLenum type, GLuint id, GLenum severity
     std::cout << "Debug : ";
 }
 
-static std::vector<MVP> generateMvps()
+static std::tuple<std::vector<T>, std::vector<RS>> generateMvps()
 {
-    std::vector<MVP> mvps;
+    std::vector<RS> rss;
+    std::vector<T> ts;
 
     glm::mat4 modelTrans[4] = {glm::translate(glm::mat4(1.0f), glm::vec3(+0.5f, +0.5f, 0.0f)),
                                glm::translate(glm::mat4(1.0f), glm::vec3(+0.5f, -0.5f, 0.0f)),
@@ -139,58 +146,89 @@ static std::vector<MVP> generateMvps()
 
     for (int i = 0; i < 4; i++)
     {
-        MVP mvp{modelTrans[i], modelScale[i], modelRoate[i]};
-        mvps.push_back(mvp);
+        RS rs{modelScale[i], modelRoate[i]};
+        T t{modelTrans[i]};
+
+        rss.push_back(rs);
+        ts.push_back(t);
     }
 
-    return mvps;
+    return std::make_tuple(ts, rss);
 }
 
-static std::vector<GLuint> configureUniforBuffer(GLuint shaderProgram, std::vector<MVP> mvps)
+static std::tuple<std::vector<GLuint>, std::vector<GLuint>> configureUniformBuffer(GLuint shaderProgram, std::vector<RS> rss, std::vector<T> ts)
 {
-    std::vector<GLuint> ubos;
+    std::vector<GLuint> ubos_rs;
+    std::vector<GLuint> ubos_t;
 
-    GLint blockSize = 0;
-    GLint ubi = glGetUniformBlockIndex(shaderProgram, "vertexData");
-    glGetActiveUniformBlockiv(shaderProgram, ubi, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+    GLint blockSizeTranslateMat = 0;
+    GLint ubiTranslateMat = glGetUniformBlockIndex(shaderProgram, "TranslateMat");
+    glGetActiveUniformBlockiv(shaderProgram, ubiTranslateMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeTranslateMat);
 
-    std::cout << "ubi : " << ubi << ", size : " << blockSize << std::endl;
+    std::cout << "ubiTranslateMat : " << ubiTranslateMat << ", size : " << blockSizeTranslateMat << std::endl;
 
-    const GLchar *names[] = {"T", "R", "S"};
-    GLuint indices[3];
-    glGetUniformIndices(shaderProgram, 3, names, indices);
+    const GLchar *nameTranslateMat[] = {"T"};
+    GLuint indicesTranslateMat[1];
+    glGetUniformIndices(shaderProgram, 1, nameTranslateMat, indicesTranslateMat);
 
-    GLint offset[3];
-    glGetActiveUniformsiv(shaderProgram, 3, indices, GL_UNIFORM_OFFSET, offset);
+    GLint offsetTranslateMat[1];
+    glGetActiveUniformsiv(shaderProgram, 1, indicesTranslateMat, GL_UNIFORM_OFFSET, offsetTranslateMat);
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 1; i++)
     {
-        std::cout << "asttribute : " << names[i] << ", index : " << indices[i] << ", offset : " << offset[i] << std::endl;
+        std::cout << "asttribute : " << nameTranslateMat[i] << ", index : " << indicesTranslateMat[i] << ", offset : " << offsetTranslateMat[i] << std::endl;
+    }
+
+    GLint blockSizeRotateScaleMat = 0;
+    GLint ubiRotateScaleMat = glGetUniformBlockIndex(shaderProgram, "RotateScaleMat");
+    glGetActiveUniformBlockiv(shaderProgram, ubiRotateScaleMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeRotateScaleMat);
+
+    std::cout << "ubiRotateScaleMat : " << ubiRotateScaleMat << ", size : " << blockSizeRotateScaleMat << std::endl;
+
+    const GLchar *nameRotateScaleMat[] = {"R", "S"};
+    GLuint indicesRotateScaleMat[2];
+    glGetUniformIndices(shaderProgram, 2, nameRotateScaleMat, indicesRotateScaleMat);
+
+    GLint offsetRotateScaleMat[2];
+    glGetActiveUniformsiv(shaderProgram, 2, indicesRotateScaleMat, GL_UNIFORM_OFFSET, offsetRotateScaleMat);
+
+    for (int i = 0; i < 1; i++)
+    {
+        std::cout << "asttribute : " << nameRotateScaleMat[i] << ", index : " << indicesRotateScaleMat[i] << ", offset : " << offsetRotateScaleMat[i] << std::endl;
     }
 
     for (int i = 0; i < 4; i++)
     {
-        GLubyte *blockBuffer = new GLubyte[blockSize];
-        GLuint ubo;
+        GLubyte *blockBufferTranslateMat = new GLubyte[blockSizeTranslateMat];
+        GLubyte *blockBufferRotateScaleMat = new GLubyte[blockSizeRotateScaleMat];
 
-        memcpy(&blockBuffer[offset[0]], &mvps[i].T, sizeof(mvps[i].T));
-        memcpy(&blockBuffer[offset[1]], &mvps[i].R, sizeof(mvps[i].R));
-        memcpy(&blockBuffer[offset[2]], &mvps[i].S, sizeof(mvps[i].S));
+        GLuint ubo_t;
+        GLuint ubo_rs;
 
-        glCreateBuffers(1, &ubo);
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-        glBufferData(GL_UNIFORM_BUFFER, blockSize, blockBuffer, GL_STATIC_DRAW);
+        memcpy(&blockBufferTranslateMat[offsetTranslateMat[0]], &ts[i].t, sizeof(ts[i].t));
+        memcpy(&blockBufferRotateScaleMat[offsetRotateScaleMat[0]], &rss[i].R, sizeof(rss[i].R));
+        memcpy(&blockBufferRotateScaleMat[offsetRotateScaleMat[1]], &rss[i].S, sizeof(rss[i].S));
+
+        glCreateBuffers(1, &ubo_t);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_t);
+        glBufferData(GL_UNIFORM_BUFFER, blockSizeTranslateMat, blockBufferTranslateMat, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        ubos_t.push_back(ubo_t);
 
-        ubos.push_back(ubo);
+        glCreateBuffers(1, &ubo_rs);
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_rs);
+        glBufferData(GL_UNIFORM_BUFFER, blockSizeRotateScaleMat, blockBufferRotateScaleMat, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        ubos_rs.push_back(ubo_rs);
 
-        delete[] blockBuffer;
+        delete[] blockBufferTranslateMat;
+        delete[] blockBufferRotateScaleMat;
     }
 
-    return ubos;
+    return std::make_tuple(ubos_t, ubos_rs);
 }
 
-int DrawUniformBuffers()
+int DrawUniformBuffersMultiBind()
 {
     std::cout << "Hello Uniform Buffers" << std::endl;
 
@@ -219,12 +257,25 @@ int DrawUniformBuffers()
     GLuint indexBufferObject = suqareElementData();
     GLuint shaderProgram = createSquareShaderProgram();
 
-    std::vector<MVP> mvps = generateMvps();
-    std::vector<GLuint> ubos = configureUniforBuffer(shaderProgram, mvps);
+    std::vector<RS> rss;
+    std::vector<T> ts;
+
+    auto mvp = generateMvps();
+    ts = std::get<0>(mvp);
+    rss = std::get<1>(mvp);
+
+    std::vector<GLuint> ubos_t;
+    std::vector<GLuint> ubos_rs;
+
+    auto ubos = configureUniformBuffer(shaderProgram, rss, ts);
+    ubos_t = std::get<0>(ubos);
+    ubos_rs = std::get<1>(ubos);
 
     glUseProgram(shaderProgram);
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+
+    GLfloat rot = 0;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -232,9 +283,20 @@ int DrawUniformBuffers()
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (GLint ubo : ubos)
+        rot = (((GLint)rot + 1) % 360);
+        glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
+
+        for (int i = 0; i < 4; i++)
         {
-            glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+            glm::mat4 rt = rotate * ts[i].t;
+
+            glBindBuffer(GL_UNIFORM_BUFFER, ubos_t[i]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubos_t[i]);
+
+            glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubos_rs[i]);
+
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
         }
 

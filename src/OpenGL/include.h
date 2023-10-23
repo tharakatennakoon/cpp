@@ -3,3 +3,4 @@
 int DrawBasicTriandle();
 int DrawModelTransform();
 int DrawUniformBuffers();
+int DrawUniformBuffersMultiBind();

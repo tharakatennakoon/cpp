@@ -2,8 +2,7 @@
 
 int main()
 {
-    // DrawBasicTriandle();
-    DrawModelTransform();
-
-    return 0;
+    // return DrawBasicTriandle();
+    // return DrawModelTransform();
+    return DrawUniformBuffers();
 }

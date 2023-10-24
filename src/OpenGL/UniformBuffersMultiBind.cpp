@@ -250,6 +250,9 @@ int DrawUniformBuffersMultiBind()
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
 
+    // to turn off vsync - 0, turn on - 1
+    glfwSwapInterval(1);
+
     gladLoadGL();
     glEnable(GL_DEPTH_TEST);
 

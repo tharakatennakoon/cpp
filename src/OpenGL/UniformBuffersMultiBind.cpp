@@ -121,9 +121,8 @@ static void DebugFunction(GLenum source, GLenum type, GLuint id, GLenum severity
     std::cout << "Debug : ";
 }
 
-static std::tuple<std::vector<Model>, std::vector<ViewProjection>> generateMvps()
+static std::vector<Model> generateModelMat()
 {
-    std::vector<ViewProjection> vps;
     std::vector<Model> ms;
 
     glm::mat4 modelTrans[4] = {glm::translate(glm::mat4(1.0f), glm::vec3(+0.5f, +0.5f, 0.0f)),
@@ -143,86 +142,83 @@ static std::tuple<std::vector<Model>, std::vector<ViewProjection>> generateMvps(
 
     for (int i = 0; i < 4; i++)
     {
-        ViewProjection vp{glm::mat4(1.0f), glm::mat4(1.0f)};
         Model m{modelTrans[i] * modelRoate[i] * modelScale[i]};
-
-        vps.push_back(vp);
         ms.push_back(m);
     }
 
-    return std::make_tuple(ms, vps);
+    return ms;
 }
 
-static std::tuple<std::vector<GLuint>, std::vector<GLuint>> configureUniformBuffer(GLuint shaderProgram, std::vector<ViewProjection> vps, std::vector<Model> ms)
+static std::tuple<std::vector<GLuint>, GLuint> configureUniformBuffer(GLuint shaderProgram, std::vector<Model> ms)
 {
     std::vector<GLuint> ubos_vp;
     std::vector<GLuint> ubos_m;
 
-    GLint blockSizeTranslateMat = 0;
-    GLint ubiTranslateMat = glGetUniformBlockIndex(shaderProgram, "Model");
-    glGetActiveUniformBlockiv(shaderProgram, ubiTranslateMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeTranslateMat);
+    GLint blockSizeModel = 0;
+    GLint ubiModelMat = glGetUniformBlockIndex(shaderProgram, "Model");
+    glGetActiveUniformBlockiv(shaderProgram, ubiModelMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeModel);
 
-    std::cout << "ubiTranslateMat : " << ubiTranslateMat << ", size : " << blockSizeTranslateMat << std::endl;
+    std::cout << "ubiModelMat : " << ubiModelMat << ", size : " << blockSizeModel << std::endl;
 
-    const GLchar *nameTranslateMat[] = {"model"};
-    GLuint indicesTranslateMat[1];
-    glGetUniformIndices(shaderProgram, 1, nameTranslateMat, indicesTranslateMat);
+    const GLchar *nameModelMat[] = {"model"};
+    GLuint indicesModelMat[1];
+    glGetUniformIndices(shaderProgram, 1, nameModelMat, indicesModelMat);
 
-    GLint offsetTranslateMat[1];
-    glGetActiveUniformsiv(shaderProgram, 1, indicesTranslateMat, GL_UNIFORM_OFFSET, offsetTranslateMat);
-
-    for (int i = 0; i < 1; i++)
-    {
-        std::cout << "asttribute : " << nameTranslateMat[i] << ", index : " << indicesTranslateMat[i] << ", offset : " << offsetTranslateMat[i] << std::endl;
-    }
-
-    GLint blockSizeRotateScaleMat = 0;
-    GLint ubiRotateScaleMat = glGetUniformBlockIndex(shaderProgram, "ViewProjection");
-    glGetActiveUniformBlockiv(shaderProgram, ubiRotateScaleMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeRotateScaleMat);
-
-    std::cout << "ubiRotateScaleMat : " << ubiRotateScaleMat << ", size : " << blockSizeRotateScaleMat << std::endl;
-
-    const GLchar *nameRotateScaleMat[] = {"view", "projection"};
-    GLuint indicesRotateScaleMat[2];
-    glGetUniformIndices(shaderProgram, 2, nameRotateScaleMat, indicesRotateScaleMat);
-
-    GLint offsetRotateScaleMat[2];
-    glGetActiveUniformsiv(shaderProgram, 2, indicesRotateScaleMat, GL_UNIFORM_OFFSET, offsetRotateScaleMat);
+    GLint offsetModelMat[1];
+    glGetActiveUniformsiv(shaderProgram, 1, indicesModelMat, GL_UNIFORM_OFFSET, offsetModelMat);
 
     for (int i = 0; i < 1; i++)
     {
-        std::cout << "asttribute : " << nameRotateScaleMat[i] << ", index : " << indicesRotateScaleMat[i] << ", offset : " << offsetRotateScaleMat[i] << std::endl;
+        std::cout << "asttribute : " << nameModelMat[i] << ", index : " << indicesModelMat[i] << ", offset : " << offsetModelMat[i] << std::endl;
     }
 
-    for (int i = 0; i < 4; i++)
-    {
-        GLubyte *blockBufferTranslateMat = new GLubyte[blockSizeTranslateMat];
-        GLubyte *blockBufferRotateScaleMat = new GLubyte[blockSizeRotateScaleMat];
+    GLint blockSizeViewProjectionMat = 0;
+    GLint ubiViewProjectionMat = glGetUniformBlockIndex(shaderProgram, "ViewProjection");
+    glGetActiveUniformBlockiv(shaderProgram, ubiViewProjectionMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeViewProjectionMat);
 
+    std::cout << "ubiViewProjectionMat : " << ubiViewProjectionMat << ", size : " << blockSizeViewProjectionMat << std::endl;
+
+    const GLchar *nameViewProjectionMat[] = {"view", "projection"};
+    GLuint indicesViewProjectionMat[2];
+    glGetUniformIndices(shaderProgram, 2, nameViewProjectionMat, indicesViewProjectionMat);
+
+    GLint offsetViewProjection[2];
+    glGetActiveUniformsiv(shaderProgram, 2, indicesViewProjectionMat, GL_UNIFORM_OFFSET, offsetViewProjection);
+
+    for (int i = 0; i < 1; i++)
+    {
+        std::cout << "asttribute : " << nameViewProjectionMat[i] << ", index : " << indicesViewProjectionMat[i] << ", offset : " << offsetViewProjection[i] << std::endl;
+    }
+
+    for (int i = 0; i < ms.size(); i++)
+    {
         GLuint ubo_m;
-        GLuint ubo_vp;
+        GLubyte *blockBufferModelMat = new GLubyte[blockSizeModel];
 
-        memcpy(&blockBufferTranslateMat[offsetTranslateMat[0]], &ms[i].model, sizeof(ms[i].model));
-        memcpy(&blockBufferRotateScaleMat[offsetRotateScaleMat[0]], &vps[i].view, sizeof(vps[i].view));
-        memcpy(&blockBufferRotateScaleMat[offsetRotateScaleMat[1]], &vps[i].projection, sizeof(vps[i].projection));
+        memcpy(&blockBufferModelMat[offsetModelMat[0]], &ms[i].model, sizeof(ms[i].model));
 
         glCreateBuffers(1, &ubo_m);
         glBindBuffer(GL_UNIFORM_BUFFER, ubo_m);
-        glBufferData(GL_UNIFORM_BUFFER, blockSizeTranslateMat, blockBufferTranslateMat, GL_STATIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, blockSizeModel, blockBufferModelMat, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
         ubos_m.push_back(ubo_m);
 
-        glCreateBuffers(1, &ubo_vp);
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
-        glBufferData(GL_UNIFORM_BUFFER, blockSizeRotateScaleMat, blockBufferRotateScaleMat, GL_STATIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        ubos_vp.push_back(ubo_vp);
-
-        delete[] blockBufferTranslateMat;
-        delete[] blockBufferRotateScaleMat;
+        delete[] blockBufferModelMat;
     }
 
-    return std::make_tuple(ubos_m, ubos_vp);
+    GLuint ubo_vp;
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+    GLubyte *blockBufferRotateScaleMat = new GLubyte[blockSizeViewProjectionMat];
+    memcpy(&blockBufferRotateScaleMat[offsetViewProjection[0]], &view, sizeof(view));
+    memcpy(&blockBufferRotateScaleMat[offsetViewProjection[1]], &projection, sizeof(projection));
+    glCreateBuffers(1, &ubo_vp);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
+    glBufferData(GL_UNIFORM_BUFFER, blockSizeViewProjectionMat, blockBufferRotateScaleMat, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    delete[] blockBufferRotateScaleMat;
+
+    return std::make_tuple(ubos_m, ubo_vp);
 }
 
 int DrawUniformBuffersMultiBind()
@@ -257,25 +253,21 @@ int DrawUniformBuffersMultiBind()
     GLuint indexBufferObject = suqareElementData();
     GLuint shaderProgram = createSquareShaderProgram();
 
-    std::vector<ViewProjection> vps;
     std::vector<Model> ms;
 
-    auto mvp = generateMvps();
-    ms = std::get<0>(mvp);
-    vps = std::get<1>(mvp);
+    ms = generateModelMat();
 
-    std::vector<GLuint> ubos_m;
-    std::vector<GLuint> ubos_vp;
-
-    auto ubos = configureUniformBuffer(shaderProgram, vps, ms);
-    ubos_m = std::get<0>(ubos);
-    ubos_vp = std::get<1>(ubos);
+    auto ubos = configureUniformBuffer(shaderProgram, ms);
+    std::vector<GLuint> ubos_m = std::get<0>(ubos);
+    GLuint ubo_vp = std::get<1>(ubos);
 
     glUseProgram(shaderProgram);
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
     GLfloat rot = 0;
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_vp);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -295,8 +287,6 @@ int DrawUniformBuffersMultiBind()
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
             glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubos_m[i]);
-
-            glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubos_vp[i]);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
         }

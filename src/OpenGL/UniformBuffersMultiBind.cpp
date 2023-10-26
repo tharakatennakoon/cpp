@@ -21,6 +21,10 @@ struct Model
     glm::mat4 model;
 };
 
+static float xPos = 0;
+static float yPos = 0;
+static float zPos = 100;
+
 static std::string get_file_string(std::string filePath)
 {
     std::ifstream ifs(filePath);
@@ -31,6 +35,36 @@ static std::string get_file_string(std::string filePath)
 static void windowSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+static void keyBoardCallback(GLFWwindow *windows, int key, int scancode, int action, int mode)
+{
+    if (key == 265 && action == 0 && yPos < 400)
+    {
+        yPos += 10;
+    }
+    else if (key == 264 && action == 0 && yPos > -400)
+    {
+        yPos -= 10;
+    }
+    else if (key == 263 && action == 0 && xPos > -400)
+    {
+        xPos -= 10;
+    }
+    else if (key == 262 && action == 0 && xPos < 400)
+    {
+        xPos += 10;
+    }
+    else if (key == 45 && action == 0 && zPos > -400)
+    {
+        zPos -= 10;
+    }
+    else if (key == 61 && action == 0 && zPos < 400)
+    {
+        zPos += 10;
+    }
+
+    std::cout << "xPos : " << xPos << ", yPos : " << yPos << ", zPos : " << zPos << std::endl;
 }
 
 static void checkShaderErrors(std::string type, GLuint shader)
@@ -125,26 +159,31 @@ static std::vector<Model> generateModelMat()
 {
     std::vector<Model> ms;
 
-    glm::mat4 modelTrans[4] = {glm::translate(glm::mat4(1.0f), glm::vec3(+0.5f, +0.5f, 0.0f)),
-                               glm::translate(glm::mat4(1.0f), glm::vec3(+0.5f, -0.5f, 0.0f)),
-                               glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 0.0f)),
-                               glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, +0.5f, 0.0f))};
+    glm::mat4 modelTrans[5] = {glm::translate(glm::mat4(1.0f), glm::vec3(+100.0f, +100.0f, -100.0f)),
+                               glm::translate(glm::mat4(1.0f), glm::vec3(+100.0f, -100.0f, -050.0f)),
+                               glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, -100.0f, +050.0f)),
+                               glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, +100.0f, +100.0f)),
+                               glm::translate(glm::mat4(1.0f), glm::vec3(+000.0f, +000.0f, +000.0f))};
 
-    glm::mat4 modelScale[4] = {glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)),
-                               glm::scale(glm::mat4(1.0f), glm::vec3(0.15f)),
-                               glm::scale(glm::mat4(1.0f), glm::vec3(0.2f)),
-                               glm::scale(glm::mat4(1.0f), glm::vec3(0.25f))};
+    glm::mat4 modelScale[] = {glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)),
+                              glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)),
+                              glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)),
+                              glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)),
+                              glm::scale(glm::mat4(1.0f), glm::vec3(20.0f))};
 
-    glm::mat4 modelRoate[4] = {glm::rotate(glm::mat4(1.0f), glm::radians(00.0f), glm::vec3(0, 0, 1)),
-                               glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0, 0, 1)),
-                               glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0, 0, 1)),
-                               glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0, 0, 1))};
+    glm::mat4 modelRoate[] = {glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0, 0, 1)),
+                              glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0, 0, 1)),
+                              glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0, 1, 0)),
+                              glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0, 1, 0)),
+                              glm::rotate(glm::mat4(1.0f), glm::radians(00.0f), glm::vec3(0, 0, 1))};
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < modelTrans->length() + 1; i++)
     {
         Model m{modelTrans[i] * modelRoate[i] * modelScale[i]};
         ms.push_back(m);
     }
+
+    std::cout << "Model Count : " << ms.size() << std::endl;
 
     return ms;
 }
@@ -207,16 +246,16 @@ static std::tuple<std::vector<GLuint>, GLuint> configureUniformBuffer(GLuint sha
     }
 
     GLuint ubo_vp;
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
-    GLubyte *blockBufferRotateScaleMat = new GLubyte[blockSizeViewProjectionMat];
-    memcpy(&blockBufferRotateScaleMat[offsetViewProjection[0]], &view, sizeof(view));
-    memcpy(&blockBufferRotateScaleMat[offsetViewProjection[1]], &projection, sizeof(projection));
+    ViewProjection vp{glm::mat4(1.0f), glm::mat4(1.0f)};
+    GLubyte *blockBufferViewProjectionMat = new GLubyte[blockSizeViewProjectionMat];
+    memcpy(&blockBufferViewProjectionMat[offsetViewProjection[0]], &vp, sizeof(vp));
+
     glCreateBuffers(1, &ubo_vp);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
-    glBufferData(GL_UNIFORM_BUFFER, blockSizeViewProjectionMat, blockBufferRotateScaleMat, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, blockSizeViewProjectionMat, blockBufferViewProjectionMat, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    delete[] blockBufferRotateScaleMat;
+
+    delete[] blockBufferViewProjectionMat;
 
     return std::make_tuple(ubos_m, ubo_vp);
 }
@@ -242,6 +281,7 @@ int DrawUniformBuffersMultiBind()
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
+    glfwSetKeyCallback(window, keyBoardCallback);
 
     // to turn off vsync - 0, turn on - 1
     glfwSwapInterval(1);
@@ -279,7 +319,15 @@ int DrawUniformBuffersMultiBind()
         glm::mat4 rotateTrans = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
         glm::mat4 rotateObject = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 1, 0));
 
-        for (int i = 0; i < 4; i++)
+        ViewProjection vp;
+        vp.view = glm::inverse(glm::translate(glm::mat4(1.0f), glm::vec3(xPos, yPos, zPos)));
+        vp.projection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 0.0f, 300.0f);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vp), &vp);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        for (int i = 0; i < ubos_m.size(); i++)
         {
             glm::mat4 rt = rotateTrans * ms[i].model * rotateObject;
 

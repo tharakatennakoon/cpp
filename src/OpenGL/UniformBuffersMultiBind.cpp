@@ -86,11 +86,11 @@ static void checkShaderErrors(std::string type, GLuint shader)
 
 static GLuint createSquareShaderProgram()
 {
-    std::string strVert = get_file_string("./shader/uniformMultiBind.vert");
+    std::string strVert = get_file_string("./shader/uniformMultiBindVert.glsl");
     const GLchar *vertCStr = strVert.c_str();
     std::cout << strVert.c_str() << std::endl;
 
-    std::string strFrag = get_file_string("./shader/uniformMultiBind.frag");
+    std::string strFrag = get_file_string("./shader/uniformMultiBindFrag.glsl");
     const GLchar *fragCStr = strFrag.c_str();
     std::cout << strFrag.c_str() << std::endl;
 
@@ -329,7 +329,7 @@ int DrawUniformBuffersMultiBind()
 
         for (int i = 0; i < ubos_m.size(); i++)
         {
-            glm::mat4 rt = rotateTrans * ms[i].model * rotateObject;
+            glm::mat4 rt = ms[i].model;
 
             glBindBuffer(GL_UNIFORM_BUFFER, ubos_m[i]);
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);

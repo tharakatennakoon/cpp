@@ -5,6 +5,9 @@
 #include <fstream>
 #include <gtc/matrix_transform.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 #include <vector>
 #include <tuple>
 
@@ -25,11 +28,34 @@ static float xPos = 0;
 static float yPos = 0;
 static float zPos = 100;
 
+static void DebugFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+{
+
+    std::cout << "Debug : ";
+}
+
 static std::string get_file_string(std::string filePath)
 {
     std::ifstream ifs(filePath);
     return std::string((std::istreambuf_iterator<char>(ifs)),
                        (std::istreambuf_iterator<char>()));
+}
+
+static GLubyte* loadImageData(std::string filePath, int *width, int *height, int *bpp)
+{
+    std::cout << "\n====================== loadImageData ==================== " << std::endl;
+    std::cout << "File Path : " << filePath << std::endl;
+
+    stbi_set_flip_vertically_on_load(1);
+    GLubyte* imageData = stbi_load(filePath.c_str(), width, height, bpp, 0);
+
+    assert(imageData != nullptr);
+    assert(*width > 0);
+    assert(*height > 0);
+
+    std::cout << "Width :" << *width << ", Height :" << *height << ", BPP : " << *bpp << std::endl;
+    std::cout << "--------------------------------------------------------- " << std::endl;
+    return imageData;
 }
 
 static void windowSizeCallback(GLFWwindow *window, int width, int height)
@@ -86,6 +112,7 @@ static void checkShaderErrors(std::string type, GLuint shader)
 
 static GLuint createSquareShaderProgram()
 {
+    std::cout << "\n============== createSquareShaderProgram ============== " << std::endl;
     std::string strVert = get_file_string("./shader/uniformMultiBindVert.glsl");
     const GLchar *vertCStr = strVert.c_str();
     std::cout << strVert.c_str() << std::endl;
@@ -112,17 +139,43 @@ static GLuint createSquareShaderProgram()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    std::cout << "--------------------------------------------------------- " << std::endl;
     return shaderProgram;
+}
+
+static GLuint createTexture(std::string filePath)
+{
+    int w = 0;
+    int h = 0;
+    int bpp = 0;
+
+    GLubyte* image_data = loadImageData(filePath, &w, &h, &bpp);
+
+    GLuint tobj;
+    glGenTextures(1, &tobj);
+    glBindTexture(GL_TEXTURE_2D, tobj);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    stbi_image_free(image_data);
+
+    return tobj;
 }
 
 static GLuint SquareModelVertex()
 {
     GLfloat verts[] = {
-        // Location XYZ      Color RGBA
-        -1.0f, +1.0f, +0.0f, +1.0f, +0.0f, +0.0f, +1.0f,
-        +1.0f, +1.0f, +0.0f, +0.0f, +1.0f, +0.0f, +1.0f,
-        +1.0f, -1.0f, +0.0f, +0.0f, +0.0f, +1.0f, +1.0f,
-        -1.0f, -1.0f, +0.0f, +1.0f, +1.0f, +0.0f, +1.0f};
+        // Location XYZ      Texture coord x,y
+        -1.0f, +1.0f, +0.0f, +0.0f, +1.0f,
+        +1.0f, +1.0f, +0.0f, +1.0f, +1.0f,
+        +1.0f, -1.0f, +0.0f, +1.0f, +0.0f,
+        -1.0f, -1.0f, +0.0f, +0.0f, +0.0f};
 
     GLuint vertexBufferObject;
     glGenBuffers(1, &vertexBufferObject);
@@ -130,10 +183,10 @@ static GLuint SquareModelVertex()
     glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)(sizeof(GLfloat) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(sizeof(GLfloat) * 3));
 
     return vertexBufferObject;
 }
@@ -149,14 +202,10 @@ static GLuint suqareElementData()
     return indexBufferObject;
 }
 
-static void DebugFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
-{
-
-    std::cout << "Debug : ";
-}
-
 static std::vector<Model> generateModelMat()
 {
+    std::cout << "\n==================== generateModelMat =================== " << std::endl;
+
     std::vector<Model> ms;
 
     glm::mat4 modelTrans[5] = {glm::translate(glm::mat4(1.0f), glm::vec3(+100.0f, +100.0f, -100.0f)),
@@ -184,17 +233,22 @@ static std::vector<Model> generateModelMat()
     }
 
     std::cout << "Model Count : " << ms.size() << std::endl;
-
+    std::cout << "--------------------------------------------------------- " << std::endl;
     return ms;
 }
 
-static std::tuple<std::vector<GLuint>, GLuint> configureUniformBuffer(GLuint shaderProgram, std::vector<Model> ms)
+static std::tuple<std::vector<GLuint>, GLuint, GLuint> configureUniformBuffer(GLuint shaderProgram, std::vector<Model> ms)
 {
-    std::vector<GLuint> ubos_vp;
+    std::cout << "\n================= configureUniformBuffer ================ " << std::endl;
+
     std::vector<GLuint> ubos_m;
+
+    GLuint gSampler = glGetUniformLocation(shaderProgram, "gSampler");
+    assert(gSampler != -1);
 
     GLint blockSizeModel = 0;
     GLint ubiModelMat = glGetUniformBlockIndex(shaderProgram, "Model");
+    assert(ubiModelMat != -1);
     glGetActiveUniformBlockiv(shaderProgram, ubiModelMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeModel);
 
     std::cout << "ubiModelMat : " << ubiModelMat << ", size : " << blockSizeModel << std::endl;
@@ -213,6 +267,7 @@ static std::tuple<std::vector<GLuint>, GLuint> configureUniformBuffer(GLuint sha
 
     GLint blockSizeViewProjectionMat = 0;
     GLint ubiViewProjectionMat = glGetUniformBlockIndex(shaderProgram, "ViewProjection");
+    assert(ubiViewProjectionMat != -1);
     glGetActiveUniformBlockiv(shaderProgram, ubiViewProjectionMat, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSizeViewProjectionMat);
 
     std::cout << "ubiViewProjectionMat : " << ubiViewProjectionMat << ", size : " << blockSizeViewProjectionMat << std::endl;
@@ -257,7 +312,9 @@ static std::tuple<std::vector<GLuint>, GLuint> configureUniformBuffer(GLuint sha
 
     delete[] blockBufferViewProjectionMat;
 
-    return std::make_tuple(ubos_m, ubo_vp);
+    std::cout << "--------------------------------------------------------- " << std::endl;
+
+    return std::make_tuple(ubos_m, ubo_vp, gSampler);
 }
 
 int DrawUniformBuffersMultiBind()
@@ -292,6 +349,7 @@ int DrawUniformBuffersMultiBind()
     GLuint vertexBufferObject = SquareModelVertex();
     GLuint indexBufferObject = suqareElementData();
     GLuint shaderProgram = createSquareShaderProgram();
+    GLuint textureObject = createTexture("./res/4.jpg");
 
     std::vector<Model> ms;
 
@@ -300,6 +358,7 @@ int DrawUniformBuffersMultiBind()
     auto ubos = configureUniformBuffer(shaderProgram, ms);
     std::vector<GLuint> ubos_m = std::get<0>(ubos);
     GLuint ubo_vp = std::get<1>(ubos);
+    GLuint gSampler = std::get<2>(ubos);
 
     glUseProgram(shaderProgram);
 
@@ -308,6 +367,8 @@ int DrawUniformBuffersMultiBind()
     GLfloat rot = 0;
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_vp);
+    glBindTexture(GL_TEXTURE_2D, textureObject);
+    glUniform1i(gSampler, 0);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -329,7 +390,7 @@ int DrawUniformBuffersMultiBind()
 
         for (int i = 0; i < ubos_m.size(); i++)
         {
-            glm::mat4 rt = ms[i].model;
+            glm::mat4 rt = ms[i].model * rotateObject;
 
             glBindBuffer(GL_UNIFORM_BUFFER, ubos_m[i]);
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);

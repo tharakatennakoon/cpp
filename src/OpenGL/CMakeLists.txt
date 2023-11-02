@@ -6,9 +6,12 @@ enable_testing()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glm)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty)
 
 find_package(glfw3 3.3 REQUIRED)
-find_package(OpenGL REQUIRED)
+
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package(OpenGL REQUIRED )
 
 add_executable(${PROJECT_NAME} 
     main.cpp 
@@ -20,7 +23,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} glfw GLU GL ${CMAKE_DL_LIBS})
 
-file(COPY shader DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY shader res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

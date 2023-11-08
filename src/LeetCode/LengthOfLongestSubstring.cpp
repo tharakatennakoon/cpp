@@ -7,9 +7,9 @@ int Solution::lengthOfLongestSubstring(string s)
 {
     unordered_map<char, int> substring_monitor_map;
     int start_pos = -1;
-    int substring_length = 0;
+    size_t substring_length = 0;
 
-    for (int index = 0; index < s.length(); index++)
+    for (size_t index = 0; index < s.length(); index++)
     {
         auto c = s[index];
 

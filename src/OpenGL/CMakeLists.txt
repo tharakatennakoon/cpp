@@ -1,12 +1,15 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.16.0)
 project(OpenGLSample VERSION 0.1.0 LANGUAGES C CXX)
 
 include(CTest)
 enable_testing()
 
+set(EXTERNAL_PROJECTS "${CMAKE_CURRENT_SOURCE_DIR}/../../External")
+include(${EXTERNAL_PROJECTS}/External.cmake)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glm)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty)
+include_directories(${EXTERNAL_PROJECTS}/src)
 
 find_package(glfw3 3.3 REQUIRED)
 

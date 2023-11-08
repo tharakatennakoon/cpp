@@ -8,10 +8,10 @@ bool Solution::isPalindrome(string s)
     });
     s.erase(it_remove, s.end());
 
-    int start_pos = 0;
-    int end_pos = s.length() - 1;
+    size_t start_pos = 0;
+    size_t end_pos = s.length() - 1;
     bool is_palindrome = true;
-    for (int i = 0; i < s.length()/2; i++, start_pos++, end_pos--)
+    for (size_t i = 0; i < s.length()/2; i++, start_pos++, end_pos--)
     {
         if (std::tolower(s[start_pos]) != std::tolower(s[end_pos]))
         {

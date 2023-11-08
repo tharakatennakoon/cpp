@@ -26,7 +26,7 @@ vector<vector<int>> Solution::threeSum1(vector<int>& nums)
         int num1 = nums[i];
 
         int j = i + 1;
-        while (j < nums.size() - 1)
+        while (j < (int)(nums.size() - 1))
         {
             int num2 = nums[j];
 
@@ -50,7 +50,7 @@ vector<vector<int>> Solution::threeSum1(vector<int>& nums)
             }
 
             j++;
-            for (;j < nums.size(); j++)
+            for (;j < (int) nums.size(); j++)
             {
                 if (num2 != nums[j])
                 {
@@ -60,7 +60,7 @@ vector<vector<int>> Solution::threeSum1(vector<int>& nums)
         }
 
         i++;
-        for (;i < nums.size()-1; i++)
+        for (;i < (int)(nums.size()-1); i++)
         {
             if (num1 != nums[i])
             {
@@ -68,7 +68,7 @@ vector<vector<int>> Solution::threeSum1(vector<int>& nums)
             }
         }
 
-        if (i >= nums.size() - 2 || nums[i] > 0)
+        if (i >= (int)(nums.size() - 2) || nums[i] > 0)
         {
             movedToPositive = true;
         }

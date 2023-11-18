@@ -5,5 +5,6 @@ int main()
     // return DrawBasicTriandle();
     // return DrawModelTransform();
     // return DrawUniformBuffers();
-    return DrawUniformBuffersMultiBind();
+    // return DrawUniformBuffersMultiBind();
+    return DrawFrameBuffer(); 
 }

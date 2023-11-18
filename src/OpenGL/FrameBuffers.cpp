@@ -109,14 +109,16 @@ static void checkShaderErrors(std::string type, GLuint shader)
     }
 }
 
-static GLuint createSquareShaderProgram()
+static GLuint createShaderProgram(std::string vertexShaderPath, std::string fragmentShaderPath)
 {
     std::cout << "\n============== createSquareShaderProgram ============== " << std::endl;
-    std::string strVert = get_file_string("./shader/uniformMultiBindVert.glsl");
+    //std::string strVert = get_file_string("./shader/uniformMultiBindVert.glsl");
+    std::string strVert = get_file_string(vertexShaderPath.c_str());
     const GLchar *vertCStr = strVert.c_str();
     std::cout << strVert.c_str() << std::endl;
 
-    std::string strFrag = get_file_string("./shader/uniformMultiBindFrag.glsl");
+    //std::string strFrag = get_file_string("./shader/uniformMultiBindFrag.glsl");
+    std::string strFrag = get_file_string(fragmentShaderPath.c_str());
     const GLchar *fragCStr = strFrag.c_str();
     std::cout << strFrag.c_str() << std::endl;
 
@@ -165,6 +167,38 @@ static GLuint createTexture(std::string filePath)
     stbi_image_free(image_data);
 
     return tobj;
+}
+
+static std::tuple<GLuint, GLuint, GLuint> createFrameBuffer(int width, int height)
+{
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+    GLuint rbo;
+    // glGenRenderbuffers(1,&rbo);
+    // glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    // glBindBuffer(GL_RENDERBUFFER, 0);
+
+    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+    return std::make_tuple(fbo, texture, rbo);
 }
 
 static GLuint SquareModelVertex()
@@ -316,7 +350,7 @@ static std::tuple<std::vector<GLuint>, GLuint, GLuint> configureUniformBuffer(GL
     return std::make_tuple(ubos_m, ubo_vp, gSampler);
 }
 
-int DrawUniformBuffersMultiBind()
+int DrawFrameBuffer()
 {
     std::cout << "Hello Uniform Buffers" << std::endl;
 
@@ -347,55 +381,77 @@ int DrawUniformBuffersMultiBind()
 
     GLuint vertexBufferObject = SquareModelVertex();
     GLuint indexBufferObject = suqareElementData();
-    GLuint shaderProgram = createSquareShaderProgram();
+    GLuint shaderProgramFrameBuffer = createShaderProgram("./shader/uniformMultiBindVert.glsl", "./shader/uniformMultiBindFrag.glsl");
     GLuint textureObject = createTexture("./res/4.jpg");
+
+    GLuint shaderProgramScreen = createShaderProgram("./shader/defaultVert.glsl", "./shader/defaultFrag.glsl");
+
+    auto frameobjects = createFrameBuffer(640, 640);
+    GLuint fbo = std::get<0>(frameobjects);
+    GLuint texture = std::get<1>(frameobjects);
+    GLuint rbo = std::get<2>(frameobjects);
 
     std::vector<Model> ms;
 
     ms = generateModelMat();
 
-    auto ubos = configureUniformBuffer(shaderProgram, ms);
+    auto ubos = configureUniformBuffer(shaderProgramFrameBuffer, ms);
     std::vector<GLuint> ubos_m = std::get<0>(ubos);
     GLuint ubo_vp = std::get<1>(ubos);
     GLuint gSampler = std::get<2>(ubos);
 
-    glUseProgram(shaderProgram);
-
-    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-
     GLfloat rot = 0;
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_vp);
-    glBindTexture(GL_TEXTURE_2D, textureObject);
     glUniform1i(gSampler, 0);
 
-    /* Loop until the user closes the window */
+   /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        rot = (((GLint)rot + 1) % 360);
-        glm::mat4 rotateTrans = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
-        glm::mat4 rotateObject = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 1, 0));
-
-        ViewProjection vp;
-        vp.view = glm::inverse(glm::translate(glm::mat4(1.0f), glm::vec3(xPos, yPos, zPos)));
-        vp.projection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 0.0f, 300.0f);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vp), &vp);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        for (int i = 0; i < ubos_m.size(); i++)
+        /* first pass */
         {
-            glm::mat4 rt = ms[i].model * rotateObject;
+            glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_vp);
+            glBindTexture(GL_TEXTURE_2D, textureObject);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
 
-            glBindBuffer(GL_UNIFORM_BUFFER, ubos_m[i]);
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);
+            glUseProgram(shaderProgramFrameBuffer);
+
+            rot = (((GLint)rot + 1) % 360);
+            glm::mat4 rotateTrans = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 0, 1));
+            glm::mat4 rotateObject = glm::rotate(glm::mat4(1.0f), glm::radians(rot), glm::vec3(0, 1, 0));
+
+            ViewProjection vp;
+            vp.view = glm::inverse(glm::translate(glm::mat4(1.0f), glm::vec3(xPos, yPos, zPos)));
+            vp.projection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 0.0f, 300.0f);
+
+            glBindBuffer(GL_UNIFORM_BUFFER, ubo_vp);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vp), &vp);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
-            glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubos_m[i]);
 
+            for (int i = 0; i < ubos_m.size(); i++)
+            {
+                glm::mat4 rt = ms[i].model * rotateObject;
+
+                glBindBuffer(GL_UNIFORM_BUFFER, ubos_m[i]);
+                glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(rt), &rt);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+                glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubos_m[i]);
+
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+            }
+        }
+        
+        /* second pass */
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glUseProgram(shaderProgramScreen);
+            glDisable(GL_DEPTH_TEST);
+            glBindTexture(GL_TEXTURE_2D, texture);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
         }
 
@@ -408,7 +464,9 @@ int DrawUniformBuffersMultiBind()
 
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &indexBufferObject);
-    glDeleteProgram(shaderProgram);
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteProgram(shaderProgramFrameBuffer);
+    glDeleteProgram(shaderProgramScreen);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

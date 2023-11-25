@@ -226,10 +226,6 @@ int DrawUniformBuffers()
 
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-    GLuint fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -252,7 +248,6 @@ int DrawUniformBuffers()
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &indexBufferObject);
     glDeleteProgram(shaderProgram);
-    glDeleteFramebuffers(1, &fbo);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

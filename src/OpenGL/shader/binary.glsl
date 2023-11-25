@@ -8,5 +8,22 @@ void main()
 {
     ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
     vec4 color = imageLoad(inImage, texelCoords);
-    imageStore(outImage, texelCoords, color);
+
+    float gray = (color.r+color.g+color.b)/3.0;
+
+    vec4 grayColor;
+
+//    if (gray >= 0.5)
+//    {
+//        grayColor = vec4(1.0, 1.0, 1.0, 1.0);
+//    }
+//    else
+//    {
+//        grayColor = vec4(0.0, 0.0, 0.0, 1.0); 
+//    }
+
+    float res = step(0.5, gray);
+    grayColor = vec4(res);
+
+    imageStore(outImage, texelCoords, grayColor);
 }

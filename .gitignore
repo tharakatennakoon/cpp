@@ -34,3 +34,5 @@
 build/
 .cache
 src/OpenGL/nvim/
+
+External/src/

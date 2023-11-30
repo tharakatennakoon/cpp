@@ -7,3 +7,4 @@ int DrawUniformBuffersMultiBind();
 int DrawFrameBuffer();
 int DrawComputeShader();
 int DrawComputeShaderStorageBuffer();
+int DrawSobel();

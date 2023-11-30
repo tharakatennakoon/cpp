@@ -8,5 +8,6 @@ int main()
     // return DrawUniformBuffersMultiBind();
     // return DrawFrameBuffer(); 
     // return DrawComputeShader();
-    return DrawComputeShaderStorageBuffer();
+    // return DrawComputeShaderStorageBuffer();
+    return DrawSobel();
 }

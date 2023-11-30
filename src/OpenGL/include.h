@@ -6,3 +6,4 @@ int DrawUniformBuffers();
 int DrawUniformBuffersMultiBind();
 int DrawFrameBuffer();
 int DrawComputeShader();
+int DrawComputeShaderStorageBuffer();

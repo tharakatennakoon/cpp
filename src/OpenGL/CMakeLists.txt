@@ -25,6 +25,7 @@ add_executable(${PROJECT_NAME}
     UniformBuffersMultiBind.cpp
     FrameBuffers.cpp
     ComputeShader.cpp
+    ComputeShaderStorageBuffer.cpp
     ./glad/src/glad.c)
 
 target_link_libraries(${PROJECT_NAME} glfw GLU GL ${CMAKE_DL_LIBS})

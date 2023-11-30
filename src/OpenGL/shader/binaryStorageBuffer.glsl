@@ -24,5 +24,9 @@ void main()
     uint pos = posY * w + posX;
     vec4 rgba = unpackUnorm4x8(data[pos]);
 
-    imageStore(outImage, texelCoords, rgba);
+    float gray = .2126 * float(rgba.r) + 0.7152 * float(rgba.g) + 0.0722 * float(rgba.b);
+
+    vec4 grayColor = vec4(step(0.5, gray));
+
+    imageStore(outImage, texelCoords, grayColor);
 }

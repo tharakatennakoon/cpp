@@ -4,7 +4,7 @@ in vec2 textCoord;
 
 out layout(location = 0) vec4 FragColor;
 
-uniform sampler2D gSampler;
+layout(binding = 1) uniform sampler2D gSampler;
 
 void main()
 {

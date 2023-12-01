@@ -307,23 +307,21 @@ int DrawComputeShaderStorageBuffer()
     GLuint ub = configureUniformBuffer(computeShader, 512, 512, 3, 2);
     GLuint outputTexture = createTexture("", 512, 512, GL_RGBA8, GL_RGBA8);
 
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, texture);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, texture);
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, ub);
+    glBindBuffer(GL_UNIFORM_BUFFER, ub);
+
+    glBindImageTexture(1, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+
+    glUseProgram(computeShader);
+    glDispatchCompute(512/32, 512/32, 1);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
    /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, texture);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, texture);
-
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, ub);
-        glBindBuffer(GL_UNIFORM_BUFFER, ub);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, outputTexture);
-        glBindImageTexture(1, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-
-        glUseProgram(computeShader);
-        glDispatchCompute(512/32, 512/32, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -331,7 +329,7 @@ int DrawComputeShaderStorageBuffer()
 
         glUseProgram(shaderProgramScreen);
         glDisable(GL_DEPTH_TEST);
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, outputTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
